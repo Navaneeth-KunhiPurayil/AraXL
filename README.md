@@ -1,9 +1,11 @@
-# Ara
+# AraXL
 
 [![ci](https://github.com/pulp-platform/ara/actions/workflows/ci.yml/badge.svg)](https://github.com/pulp-platform/ara/actions/workflows/ci.yml)
 
-Ara is a vector unit working as a coprocessor for the CVA6 core.
+The scaled up Ara version AraXL is a vector unit working as a coprocessor for the CVA6 core.
 It supports the RISC-V Vector Extension, [version 1.0](https://github.com/riscv/riscv-v-spec/releases/tag/v1.0).
+
+AraXL is build using multiple Ara instances (Ara2 - https://github.com/pulp-platform/ara), interface designed to interconnect multiple Ara2 clusters to the L2 memory, CVA6 core and other neighboring clusters.
 
 ## Dependencies
 
@@ -61,7 +63,11 @@ make verilator
 ## Configuration
 
 Ara's parameters are centralized in the `config` folder, which provides several configurations to the vector machine.
-Please check `config/README.md` for more details.
+Please check `config/README.md` for more details. This sets the number of lanes and the `VLEN` per Ara cluster.
+
+By default the number of clusters is 2 and the number of lanes per clusters is 4 for an 8 lane AraXL configuration.
+
+To change the configuration set `nr_clusters=4` and `nr_lanes=8` when compiling applications or hardware.
 
 Prepend `config=chosen_ara_configuration` to your Makefile commands, or export the `ARA_CONFIGURATION` variable, to chose a configuration other than the `default` one.
 
@@ -74,6 +80,10 @@ The `apps` folder contains example applications that work on Ara. Run the follow
 ```bash
 cd apps
 make bin/hello_world
+```
+fmatmul example for 32 lane configuration
+```
+make bin/fmatmul nr_clusters=4 nr_lanes=8
 ```
 
 ### SPIKE Simulation
@@ -130,7 +140,7 @@ To simulate the Ara system with ModelSim, go to the `hardware` folder, which con
 # Go to the hardware folder
 cd hardware
 # Only compile the hardware without running the simulation.
-make compile
+make compile nr_clusters=4 nr_lanes=8
 # Run the simulation with the *hello_world* binary loaded
 app=hello_world make sim
 # Run the simulation with the *some_binary* binary. This allows specifying the full path to the binary
@@ -185,7 +195,7 @@ To compile a program and generate its vector trace:
 
 ```bash
 cd apps
-make bin/${program}.ideal
+make bin/${program}.ideal nr_clusters=4 nr_lanes=8
 ```
 
 This command will generate the `ideal` binary to be loaded in the L2 memory for the simulation (data accessed by the vector code).
@@ -193,7 +203,7 @@ To run the system in Ideal Dispatcher mode:
 
 ```bash
 cd hardware
-make sim app=${program} ideal_dispatcher=1
+make sim app=${program} ideal_dispatcher=1 nr_clusters=4 nr_lanes=8
 ```
 
 ### VCD Dumping
@@ -213,7 +223,20 @@ We also provide Synopsys Spyglass linting scripts in the hardware/spyglass. Run 
 
 ## Publications
 
-If you want to use Ara, you can cite us:
+If you want to use AraXL, you can cite us:
+```
+@INPROCEEDINGS{10992880,
+  author={Purayil, Navaneeth Kunhi and Perotti, Matteo and Fischer, Tim and Benini, Luca},
+  booktitle={2025 Design, Automation & Test in Europe Conference (DATE)}, 
+  title={AraXL: A Physically Scalable, Ultra-Wide RISC-V Vector Processor Design for Fast and Efficient Computation on Long Vectors}, 
+  year={2025},
+  volume={},
+  number={},
+  pages={1-7},
+  keywords={Scalability;Computer architecture;Parallel processing;Vectors;Energy efficiency;Registers;Computational efficiency;Vector processors;Kernel;Optimization;Vector processors;RISC-V;Scalability},
+  doi={10.23919/DATE64628.2025.10992880}
+}
+```
 ```
 @Article{Ara2020,
   author = {Matheus Cavalcante and Fabian Schuiki and Florian Zaruba and Michael Schaffner and Luca Benini},
